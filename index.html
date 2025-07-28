@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Đăng ký khóa học nhiều người</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    table {
+      margin-top: 30px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Form đăng ký nhiều học viên</h2>
+
+  <form id="form">
+    <label>Họ và tên:</label>
+    <input type="text" id="hovaten" required>
+
+    <label>Khóa học:</label>
+    <input type="text" id="khoahoc" required>
+
+    <label>Bảo lưu:</label>
+    <input type="text" id="baoluu" required>
+
+    <div class="action-buttons">
+      <button type="button" onclick="themVaoDanhSach()">Thêm vào danh sách</button>
+      <button type="button" onclick="guiTatCa()">Gửi tất cả</button>
+    </div>
+  </form>
+
+  <table id="bangDanhSach" style="display:none;">
+    <thead>
+      <tr>
+        <th>Họ và tên</th>
+        <th>Khóa học</th>
+        <th>Bảo lưu</th>
+        <th>Xoá</th>
+      </tr>
+    </thead>
+    <tbody id="danhSachBody">
+    </tbody>
+  </table>
+
+  <script>
+    const danhSach = [];
+
+    function themVaoDanhSach() {
+      const hovaten = document.getElementById('hovaten').value.trim();
+      const khoahoc = document.getElementById('khoahoc').value.trim();
+      const baoluu = document.getElementById('baoluu').value.trim();
+
+      if (!hovaten || !khoahoc || !baoluu) {
+        alert("Vui lòng điền đầy đủ thông tin.");
+        return;
+      }
+
+      danhSach.push({ hovaten, khoahoc, baoluu });
+      capNhatBang();
+      document.getElementById('form').reset();
+    }
+
+    function capNhatBang() {
+      const body = document.getElementById('danhSachBody');
+      const table = document.getElementById('bangDanhSach');
+      body.innerHTML = "";
+
+      danhSach.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${item.hovaten}</td>
+          <td>${item.khoahoc}</td>
+          <td>${item.baoluu}</td>
+          <td><button onclick="xoaDong(${index})">Xoá</button></td>
+        `;
+
+        body.appendChild(row);
+      });
+
+      table.style.display = danhSach.length > 0 ? "table" : "none";
+    }
+
+    function xoaDong(index) {
+      danhSach.splice(index, 1);
+      capNhatBang();
+    }
+
+    async function guiTatCa() {
+      if (danhSach.length === 0) {
+        alert("Chưa có dữ liệu để gửi.");
+        return;
+      }
+
+      const response = await fetch('https://script.google.com/macros/s/AKfycbwLnzeYEyc5i7ODh6e1ENNs_EsX1ibrdGe2kiXmEWwLal_hbylQKM8MUWDJ9oasFMiS/exec', {
+        method: 'POST',
+        body: JSON.stringify(danhSach),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const text = await response.text();
+      alert(text);
+      danhSach.length = 0;
+      capNhatBang();
+    }
+  </script>
+
+</body>
+</html>
